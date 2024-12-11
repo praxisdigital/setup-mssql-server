@@ -1,24 +1,40 @@
 #!/bin/sh
 
+printf "Setting up SQL Server\n"
+
 if [ -z "$INPUT_VERSION" ]; then
     echo "INPUT_VERSION is not set."
     exit 1
+else
+    echo "Using mcr.microsoft.com/mssql/server:${INPUT_VERSION}"
 fi
+
 if [ -z "$INPUT_SA_PASSWORD" ]; then
     echo "INPUT_SA_PASSWORD is not set. Exiting."
     exit 1
+else
+    echo "SA password is set"
 fi
+
 if [ -z "$INPUT_DB" ]; then
     echo "INPUT_DB is not set. Exiting."
     exit 1
+else
+    printf "Database name: $INPUT_DB\n"
 fi
+
 if [ -z "$INPUT_USER" ]; then
     echo "INPUT_USER is not set. Exiting."
     exit 1
+else
+    printf "DB user name: $INPUT_USER\n"
 fi
+
 if [ -z "$INPUT_PASSWORD" ]; then
     echo "INPUT_PASSWORD is not set. Exiting."
     exit 1
+else
+    printf "DB user password is set\n"
 fi
 
 container_name=$(tr -dc a-z0-9 </dev/urandom | head -c 14)
@@ -27,7 +43,9 @@ image=mcr.microsoft.com/mssql/server:${INPUT_VERSION}
 
 # Run SQL Server
 printf "Starting SQL Server container $container_name with image $image\n"
-docker_run="docker run -d --rm --name $container_name -p ${INPUT_PORT:-1433}:1433 -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD=$INPUT_SA_PASSWORD -e MSSQL_PID=Developer $image"
+docker_run="docker run --detach --rm --name $container_name -p ${INPUT_PORT:-1433}:1433 -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD=$INPUT_SA_PASSWORD $image"
+
+printf "Running: $docker_run\n"
 
 container_id=$($docker_run)
 
