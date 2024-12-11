@@ -1,0 +1,26 @@
+name: "Enchman's Microsoft SQL Server action"
+description: "Connect to a Microsoft SQL Server and run a query"
+inputs:
+  sa_password:
+    description: 'The password for the SQL Server sa user'
+    required: false
+    default: 'enchman_2_Action'
+  port:
+    description: 'The port to connect to the SQL Server'
+    required: false
+    default: '1433'
+  db:
+    description: 'The name of the database to connect to'
+    required: false
+    default: 'test'
+  user:
+    description: 'MSSQL database user'
+    required: true
+    default: 'test'
+  password:
+    description: 'MSSQL database password'
+    required: true
+    default: 'test'
+runs:
+  using: "docker"
+  image: "Dockerfile"
