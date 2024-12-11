@@ -1,14 +1,11 @@
-ARG VERSION=2022-latest
-
-# Build Microsoft SQL Server
-FROM mcr.microsoft.com/mssql/server:${VERSION:-2022-latest}
+FROM docker:stable
 
 USER root
 
 COPY entrypoint.sh /entrypoint.sh
 
+RUN apk add --no-cache bash
+
 RUN chmod +x /entrypoint.sh
 
-ENV ACCEPT_EULA=Y
-
-ENTRYPOINT [ "/entrypoint.sh" ]
+ENTRYPOINT ["/entrypoint.sh"]
