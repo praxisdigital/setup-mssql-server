@@ -1,6 +1,10 @@
 name: "Enchman's Microsoft SQL Server action"
 description: "Connect to a Microsoft SQL Server and run a query"
 inputs:
+  version:
+    description: 'The version of SQL Server image to use'
+    required: false
+    default: '2022-latest'
   sa_password:
     description: 'The password for the SQL Server sa user'
     required: false
