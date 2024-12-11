@@ -42,11 +42,11 @@ while ! is_mssql_running; do
 done
 
 # Create database
-docker exec -it $container_name $sqlbin -S localhost -U sa -P $INPUT_SA_PASSWORD -Q "CREATE DATABASE $INPUT_DB;"
+docker exec $container_name $sqlbin -S localhost -U sa -P $INPUT_SA_PASSWORD -Q "CREATE DATABASE $INPUT_DB;"
 
 # Create user and password with full grant
 create_user_query="CREATE LOGIN $INPUT_USER WITH PASSWORD = '$INPUT_PASSWORD';"
 create_user_query="$create_user_query CREATE USER $INPUT_USER FOR LOGIN $INPUT_USER;"
 create_user_query="$create_user_query ALTER ROLE db_owner ADD MEMBER $INPUT_USER;"
 create_user_query="$create_user_query ALTER LOGIN $INPUT_USER ENABLE;"
-docker exec -it $container_name $sqlbin -S localhost -U sa -P $INPUT_SA_PASSWORD -Q "$create_user_query";
+docker exec $container_name $sqlbin -S localhost -U sa -P $INPUT_SA_PASSWORD -Q "$create_user_query";
