@@ -24,7 +24,7 @@ fi
 container_name=$(tr -dc a-z0-9 </dev/urandom | head -c 14)
 
 image=mcr.microsoft.com/mssql/server:${INPUT_VERSION}
-docker_run="docker run -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD=$INPUT_SA_PASSWORD -e MSSQL_PID=Developer -p ${INPUT_PORT:-1433}:1433 --name $container_name --rm -d $image"
+docker_run="docker run -d --rm --name $container_name -p ${INPUT_PORT:-1433}:1433 -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD=$INPUT_SA_PASSWORD -e MSSQL_PID=Developer $image"
 
 
 sh -c "$docker_run"
@@ -33,7 +33,7 @@ sh -c "$docker_run"
 sqlbin=/opt/mssql-tools/bin/sqlcmd
 
 is_mssql_running() {
-    docker exec -it $container_name $sqlbin -S localhost -U sa -P $INPUT_SA_PASSWORD -Q "SELECT 1" > /dev/null 2>&1
+    docker exec $container_name $sqlbin -S localhost -U sa -P $INPUT_SA_PASSWORD -Q "SELECT 1" > /dev/null 2>&1
 }
 
 # Delay until SQL Server is up
