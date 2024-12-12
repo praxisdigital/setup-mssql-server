@@ -87,7 +87,5 @@ container_health_check
 
 # Create the database and user
 docker exec $container_name $client -C -S $addr -U sa -P $sa_password -Q "CREATE DATABASE $db_name;"
-docker exec $container_name $client -C -S $addr -U sa -P $sa_password -Q "CREATE LOGIN $db_user WITH PASSWORD='$db_password', CHECK_POLICY = OFF;"
-docker exec $container_name $client -C -S $addr -U sa -P $sa_password -Q "CREATE USER $db_user FOR LOGIN $db_user;"
-docker exec $container_name $client -C -S $addr -U sa -P $sa_password -Q "ALTER ROLE db_owner ADD MEMBER $db_user;"
-docker exec $container_name $client -C -S $addr -U sa -P $sa_password -Q "GRANT ALL PRIVILEGES TO $db_user;"
+docker exec $container_name $client -C -S $addr -U sa -P $sa_password -Q "USE master; CREATE LOGIN $db_user WITH PASSWORD = '$db_password', CHECK_POLICY = OFF;"
+docker exec $container_name $client -C -S $addr -U sa -P $sa_password -Q "USE master; EXEC master..sp_addsrvrolemember @loginame = '$db_user', @rolename = 'sysadmin';"
