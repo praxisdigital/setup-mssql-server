@@ -28,10 +28,14 @@ inputs:
     description: "SQL Server port"
     required: false
     default: "1433"
+  container:
+    description: "Container name"
+    required: false
+    default: "setup_mssql_server"
 runs:
   using: "composite"
   steps:
     - shell: bash
       run: |
         chmod +x ${{ github.action_path }}/install.sh
-        ${{ github.action_path }}/install.sh ${{ inputs.version }} ${{ inputs.sa-password }} ${{ inputs.user }} ${{ inputs.password }} ${{ inputs.database }} ${{ inputs.port }}
+        ${{ github.action_path }}/install.sh ${{ inputs.version }} ${{ inputs.sa-password }} ${{ inputs.user }} ${{ inputs.password }} ${{ inputs.database }} ${{ inputs.port }} ${{ inputs.container }}
