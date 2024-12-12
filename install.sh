@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # Setup the variables
+tag="latest"
+
 version=${1:-2022}
 sa_password=${2:-Password@12345!}
 db_user=${3:-test}
@@ -9,15 +11,16 @@ db_name=${5:-test}
 port=${6:-1433}
 container_name=${7:-setup_mssql_server}
 ssl_mode=${8:-disable} # (Not fully implemented yet)
-tag="latest"
-image="mcr.microsoft.com/mssql/server:${version}-${tag}"
+image_tag=${9:-"$version-$tag"}
+
+image="mcr.microsoft.com/mssql/server:${image_tag}"
 client="/opt/mssql-tools18/bin/sqlcmd"
 addr="localhost"
 ssl_opt="-N disabled"
 
 # Check if the version is supported
-if [[ $version -le 2017 ]]; then
-    printf "Version 2017 or earlier is not supported\n"
+if [[ $version -lt 2017 ]]; then
+    printf "The version ${version} is not supported\n"
     exit 1
 fi
 
@@ -87,7 +90,5 @@ container_health_check
 
 # Create the database and user
 docker exec $container_name $client -C -S $addr -U sa -P $sa_password -Q "CREATE DATABASE $db_name;"
-docker exec $container_name $client -C -S $addr -U sa -P $sa_password -Q "CREATE LOGIN $db_user WITH PASSWORD='$db_password';"
-docker exec $container_name $client -C -S $addr -U sa -P $sa_password -Q "CREATE USER $db_user FOR LOGIN $db_user;"
-docker exec $container_name $client -C -S $addr -U sa -P $sa_password -Q "ALTER ROLE db_owner ADD MEMBER $db_user;"
-docker exec $container_name $client -C -S $addr -U sa -P $sa_password -Q "GRANT ALL PRIVILEGES TO $db_user;"
+docker exec $container_name $client -C -S $addr -U sa -P $sa_password -Q "USE master; CREATE LOGIN $db_user WITH PASSWORD='$db_password';"
+docker exec $container_name $client -C -S $addr -U sa -P $sa_password -Q "USE master; EXEC master..sp_addsrvrolemember @loginame = '$db_user', @rolename = 'sysadmin';"

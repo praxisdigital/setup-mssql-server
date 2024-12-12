@@ -1,4 +1,4 @@
-name: "Setup MSSQL"
+name: "Set up MSSQL"
 description: "Setup MSSQL"
 branding:
   icon: "database"
@@ -7,9 +7,9 @@ inputs:
   sa-password:
     description: "SQL Server SA password"
     required: false
-    default: "Password-123!"
+    default: "Password@12345!"
   version:
-    description: "SQL Server version"
+    description: "SQL Server version. This will choose the latest patch version of the specified version. For example, 2022 will use 2022-latest image."
     required: false
     default: "2022"
   user:
@@ -28,14 +28,26 @@ inputs:
     description: "SQL Server port"
     required: false
     default: "1433"
-  container:
+  container-name:
     description: "Container name"
     required: false
     default: "setup_mssql_server"
+  image-tag:
+    description: "SQL Server image tag. If specified, it will override 'version' input. See more at https://mcr.microsoft.com/v2/mssql/server/tags/list"
+    required: false
+    default: ""
 runs:
   using: "composite"
   steps:
     - shell: bash
       run: |
         chmod +x ${{ github.action_path }}/install.sh
-        ${{ github.action_path }}/install.sh ${{ inputs.version }} ${{ inputs.sa-password }} ${{ inputs.user }} ${{ inputs.password }} ${{ inputs.database }} ${{ inputs.port }} ${{ inputs.container }}
+        ${{ github.action_path }}/install.sh \
+          ${{ inputs.version }} \
+          ${{ inputs.sa-password }} \
+          ${{ inputs.user }} \
+          ${{ inputs.password }} \
+          ${{ inputs.database }} \
+          ${{ inputs.port }} \
+          ${{ inputs.container-name }} \
+          ${{ inputs.image-tag }}
