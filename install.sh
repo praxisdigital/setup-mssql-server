@@ -7,12 +7,13 @@ db_user=${3:-test}
 db_password=${4:-test}
 db_name=${5:-test}
 port=${6:-1433}
-ssl_mode=${7:-disable} # (Not implemented yet) disable|require
+ssl_mode=${7:-disable} # (Not implemented yet) disable|true|false
 tag="latest"
 image="mcr.microsoft.com/mssql/server:${version}-${tag}"
 container_name=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 12)
 client="/opt/mssql-tools18/bin/sqlcmd"
 addr="localhost"
+ssl_opt="-N disabled"
 
 # Check if the version is supported
 if [[ $version -le 2017 ]]; then
@@ -41,7 +42,33 @@ container_health_check () {
     done
 }
 
+setup_ssl () {
+    # Setup SSL mode
+    mkdir -p /opt/mssql
+
+    # Generate the mssql.pem and mssql.key files
+    openssl req -x509 -nodes -newkey rsa:2048 \
+        -subj '/CN=localhost' \
+        -keyout /opt/mssql/mssql.key \
+        -out /opt/mssql/mssql.pem -days 30
+
+    # Create the mssql.conf file
+    touch /opt/mssql/mssql.conf
+    echo "[network]" >> /opt/mssql/mssql.conf
+    echo "tlscert = /var/opt/mssql/mssql.pem" >> /opt/mssql/mssql.conf
+    echo "tlskey = /var/opt/mssql/mssql.key" >> /opt/mssql/mssql.conf
+    echo "tlsprotocols = 1.2" >> /opt/mssql/mssql.conf
+
+    sudo chmod -R 775 /opt/mssql
+
+    cp /opt/mssql/mssql.pem /usr/share/ca-certificates/mssql.crt
+
+    sudo dpkg-reconfigure ca-certificates
+}
+
 # Run MSSQL server container
+setup_ssl
+
 docker run \
     --name=$container_name \
     -e "ACCEPT_EULA=Y" \
@@ -51,11 +78,14 @@ docker run \
     --health-retries=3 \
     --health-interval="10s" \
     -p ${port}:1433 \
+    -v /opt/mssql/mssql.conf:/var/opt/mssql/mssql.conf \
+    -v /opt/mssql/mssql.pem:/var/opt/mssql/mssql.pem \
+    -v /opt/mssql/mssql.key:/var/opt/mssql/mssql.key \
     -d "$image"
 
 container_health_check
 
 # Create the database and user
-docker exec $container_name $client -S $addr -U sa -P $sa_password -Q "CREATE DATABASE $db_name;"
-docker exec $container_name $client -S $addr -U sa -P $sa_password -Q "CREATE LOGIN $db_user WITH PASSWORD='$db_password';"
-docker exec $container_name $client -S $addr -U sa -P $sa_password -Q "CREATE USER $db_user FOR LOGIN $db_user;"
+docker exec $container_name $client -C -S $addr -U sa -P $sa_password -Q "CREATE DATABASE $db_name;"
+docker exec $container_name $client -C -S $addr -U sa -P $sa_password -Q "CREATE LOGIN $db_user WITH PASSWORD='$db_password';"
+docker exec $container_name $client -C -S $addr -U sa -P $sa_password -Q "CREATE USER $db_user FOR LOGIN $db_user;"
