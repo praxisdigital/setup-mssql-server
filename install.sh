@@ -56,6 +56,6 @@ docker run \
 container_health_check
 
 # Create the database and user
-docker exec -it $container_name $client -S $addr -U sa -P $sa_password -Q "CREATE DATABASE $db_name;"
-docker exec -it $container_name $client -S $addr -U sa -P $sa_password -Q "CREATE LOGIN $db_user WITH PASSWORD='$db_password';"
-docker exec -it $container_name $client -S $addr -U sa -P $sa_password -Q "CREATE USER $db_user FOR LOGIN $db_user;"
+docker exec $container_name $client -S $addr -U sa -P $sa_password -Q "CREATE DATABASE $db_name;"
+docker exec $container_name $client -S $addr -U sa -P $sa_password -Q "CREATE LOGIN $db_user WITH PASSWORD='$db_password';"
+docker exec $container_name $client -S $addr -U sa -P $sa_password -Q "CREATE USER $db_user FOR LOGIN $db_user;"
