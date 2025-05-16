@@ -90,5 +90,5 @@ container_health_check
 
 # Create the database and user
 docker exec $container_name $client -C -S $addr -U sa -P $sa_password -Q "CREATE DATABASE $db_name;"
-docker exec $container_name $client -C -S $addr -U sa -P $sa_password -Q "USE master; CREATE LOGIN $db_user WITH PASSWORD='$db_password', CHECK_POLICY = OFF, CHECK_EXPIRY = OFF;"
+docker exec $container_name $client -C -S $addr -U sa -P $sa_password -Q "USE master; CREATE LOGIN $db_user WITH PASSWORD='$db_password', CHECK_POLICY = OFF;"
 docker exec $container_name $client -C -S $addr -U sa -P $sa_password -Q "USE master; EXEC master..sp_addsrvrolemember @loginame = '$db_user', @rolename = 'sysadmin';"
